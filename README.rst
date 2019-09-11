@@ -8,14 +8,15 @@ enter?"
 Except instead of the usual story, we're going to try to answer this question
 in as much detail as possible. No skipping out on anything.
 
-This is a collaborative process, so dig in and try to help out! There's tons of
-details missing, just waiting for you to add them! So send us a pull request,
-please!
+This is a collaborative process, so dig in and try to help out! There are tons
+of details missing, just waiting for you to add them! So send us a pull
+request, please!
 
 This is all licensed under the terms of the `Creative Commons Zero`_ license.
 
-Read this in `简体中文`_ (simplified Chinese). NOTE: this has not been reviewed
-by the alex/what-happens-when maintainers.
+Read this in `简体中文`_ (simplified Chinese), `日本語`_ (Japanese) and `한국어`_
+(Korean). NOTE: these have not been reviewed by the alex/what-happens-when
+maintainers.
 
 Table of Contents
 ====================
@@ -26,17 +27,17 @@ Table of Contents
 
 The "g" key is pressed
 ----------------------
-The following sections explains all about the physical keyboard
-and the OS interrupts. But, a whole lot happens after that which
-isn't explained. When you just press "g" the browser receives the
-event and the entire auto-complete machinery kicks into high gear.
+The following sections explain the physical keyboard actions
+and the OS interrupts. When you press the key "g" the browser receives the
+event and the auto-complete functions kick in.
 Depending on your browser's algorithm and if you are in
 private/incognito mode or not various suggestions will be presented
-to you in the dropbox below the URL bar. Most of these algorithms
-prioritize results based on search history and bookmarks. You are
-going to type "google.com" so none of it matters, but a lot of code
-will run before you get there and the suggestions will be refined
-with each key press. It may even suggest "google.com" before you type it.
+to you in the dropdown below the URL bar. Most of these algorithms sort
+and prioritize results based on search history, bookmarks, cookies, and
+popular searches from the internet as a whole. As you are typing
+"google.com" many blocks of code run and the suggestions will be refined
+with each key press. It may even suggest "google.com" before you finish typing
+it.
 
 The "enter" key bottoms out
 ---------------------------
@@ -63,7 +64,7 @@ connection, but historically has been over PS/2 or ADB connections.
   declared by the keyboard), so it gets the keycode value stored on it.
 
 - This value goes to the USB SIE (Serial Interface Engine) to be converted in
-  one or more USB packets that follows the low level USB protocol.
+  one or more USB packets that follow the low level USB protocol.
 
 - Those packets are sent by a differential electrical signal over D+ and D-
   pins (the middle 2) at a maximum speed of 1.5 Mb/s, as an HID
@@ -82,9 +83,9 @@ connection, but historically has been over PS/2 or ADB connections.
   circuit through the electrostatic field of the conductive layer and
   creates a voltage drop at that point on the screen. The
   ``screen controller`` then raises an interrupt reporting the coordinate of
-  the 'click'.
+  the key press.
 
-- Then the mobile OS notifies the current focused application of a click event
+- Then the mobile OS notifies the current focused application of a press event
   in one of its GUI elements (which now is the virtual keyboard application
   buttons).
 
@@ -179,8 +180,17 @@ Is it a URL or a search term?
 
 When no protocol or valid domain name is given the browser proceeds to feed
 the text given in the address box to the browser's default web search engine.
-In many cases the url has a special piece of text appended to it to tell the
-search engine that it came from a particular browser's url bar.
+In many cases the URL has a special piece of text appended to it to tell the
+search engine that it came from a particular browser's URL bar.
+
+Convert non-ASCII Unicode characters in hostname
+------------------------------------------------
+
+* The browser checks the hostname for characters that are not in ``a-z``,
+  ``A-Z``, ``0-9``, ``-``, or ``.``.
+* Since the hostname is ``google.com`` there won't be any, but if there were
+  the browser would apply `Punycode`_ encoding to the hostname portion of the
+  URL.
 
 Check HSTS list
 ---------------
@@ -196,20 +206,11 @@ Check HSTS list
   `downgrade attack`_, which is why the HSTS list is included in modern web
   browsers.)
 
-
-Convert non-ASCII Unicode characters in hostname
-------------------------------------------------
-
-* The browser checks the hostname for characters that are not in ``a-z``,
-  ``A-Z``, ``0-9``, ``-``, or ``.``.
-* Since the hostname is ``google.com`` there won't be any, but if there were
-  the browser would apply `Punycode`_ encoding to the hostname portion of the
-  URL.
-
 DNS lookup
 ----------
 
-* Browser checks if the domain is in its cache.
+* Browser checks if the domain is in its cache. (to see the DNS Cache in
+  Chrome, go to `chrome://net-internals/#dns <chrome://net-internals/#dns>`_).
 * If not found, the browser calls ``gethostbyname`` library function (varies by
   OS) to do the lookup.
 * ``gethostbyname`` checks if the hostname can be resolved by reference in the
@@ -226,9 +227,10 @@ DNS lookup
 
 ARP process
 -----------
-In order to send an ARP broadcast the network stack library needs the target IP
-address to look up. It also needs to know the MAC address of the interface it
-will use to send out the ARP broadcast.
+
+In order to send an ARP (Address Resolution Protocol) broadcast the network
+stack library needs the target IP address to look up. It also needs to know the
+MAC address of the interface it will use to send out the ARP broadcast.
 
 The ARP cache is first checked for an ARP entry for our target IP. If it is in
 the cache, the library function returns the result: Target IP = MAC.
@@ -242,7 +244,8 @@ If the entry is not in the ARP cache:
 
 * The MAC address of the selected network interface is looked up.
 
-* The network library sends a Layer 2 ARP request:
+* The network library sends a Layer 2 (data link layer of the `OSI model`_)
+  ARP request:
 
 ``ARP Request``::
 
@@ -266,7 +269,7 @@ Hub:
 
 Switch:
 
-* If the computer is connected to a switch, the switch will check it's local
+* If the computer is connected to a switch, the switch will check its local
   CAM/MAC table to see which port has the MAC address we are looking for. If
   the switch has no entry for the MAC address it will rebroadcast the ARP
   request to all other ports.
@@ -298,7 +301,7 @@ Opening of a socket
 Once the browser receives the IP address of the destination server, it takes
 that and the given port number from the URL (the HTTP protocol defaults to port
 80, and HTTPS to port 443), and makes a call to the system library function
-named ``socket`` and requests a TCP socket stream - ``AF_INET`` and
+named ``socket`` and requests a TCP socket stream - ``AF_INET/AF_INET6`` and
 ``SOCK_STREAM``.
 
 * This request is first passed to the Transport Layer where a TCP segment is
@@ -332,12 +335,13 @@ or direct Ethernet connections in which case the data remains digital and
 is passed directly to the next `network node`_ for processing.
 
 Eventually, the packet will reach the router managing the local subnet. From
-there, it will continue to travel to the AS's border routers, other ASes, and
-finally to the destination server. Each router along the way extracts the
-destination address from the IP header and routes it to the appropriate next
-hop. The TTL field in the IP header is decremented by one for each router that
-passes. The packet will be dropped if the TTL field reaches zero or if the
-current router has no space in its queue (perhaps due to network congestion).
+there, it will continue to travel to the autonomous system's (AS) border
+routers, other ASes, and finally to the destination server. Each router along
+the way extracts the destination address from the IP header and routes it to
+the appropriate next hop. The time to live (TTL) field in the IP header is
+decremented by one for each router that passes. The packet will be dropped if
+the TTL field reaches zero or if the current router has no space in its queue
+(perhaps due to network congestion).
 
 This send and receive happens multiple times following the TCP connection flow:
 
@@ -365,7 +369,8 @@ This send and receive happens multiple times following the TCP connection flow:
 TLS handshake
 -------------
 * The client computer sends a ``ClientHello`` message to the server with its
-  TLS version, list of cipher algorithms and compression methods available.
+  Transport Layer Security (TLS) version, list of cipher algorithms and
+  compression methods available.
 
 * The server replies with a ``ServerHello`` message to the client with the
   TLS version, selected cipher, selected compression methods and the server's
@@ -465,8 +470,9 @@ and IIS for Windows.
 
 * The HTTPD (HTTP Daemon) receives the request.
 * The server breaks down the request to the following parameters:
-   * HTTP Request Method (either GET, POST, HEAD, PUT and DELETE). In the case
-     of a URL entered directly into the address bar, this will be GET.
+   * HTTP Request Method (either ``GET``, ``HEAD``, ``POST``, ``PUT``,
+     ``PATCH``, ``DELETE``, ``CONNECT``, ``OPTIONS``, or ``TRACE``). In the
+     case of a URL entered directly into the address bar, this will be ``GET``.
    * Domain, in this case - google.com.
    * Requested path/page, in this case - / (as no specific path/page was
      requested, / is the default path).
@@ -553,7 +559,7 @@ HTML parsing
 The rendering engine starts getting the contents of the requested
 document from the networking layer. This will usually be done in 8kB chunks.
 
-The primary job of HTML parser to parse the HTML markup into a parse tree.
+The primary job of HTML parser is to parse the HTML markup into a parse tree.
 
 The output tree (the "parse tree") is a tree of DOM element and attribute
 nodes. DOM is short for Document Object Model. It is the object presentation
@@ -675,4 +681,7 @@ page rendering and painting.
 .. _`network node`: https://en.wikipedia.org/wiki/Computer_network#Network_nodes
 .. _`varies by OS` : https://en.wikipedia.org/wiki/Hosts_%28file%29#Location_in_the_file_system
 .. _`简体中文`: https://github.com/skyline75489/what-happens-when-zh_CN
+.. _`한국어`: https://github.com/SantonyChoi/what-happens-when-KR
+.. _`日本語`: https://github.com/tettttsuo/what-happens-when-JA
 .. _`downgrade attack`: http://en.wikipedia.org/wiki/SSL_stripping
+.. _`OSI Model`: https://en.wikipedia.org/wiki/OSI_model
